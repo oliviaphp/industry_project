@@ -12,7 +12,9 @@
 
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <script src="script.js" async></script>
+    
+    <!--<script src="SpeechToText-WebSockets-Javascript/distrib//speech.sdk.bundle.js"></script>-->
+   
 
   </head>
   <body>
@@ -20,9 +22,13 @@
      
 
       <div class="menubutton">
+        <!-- <div class="bar"></div>
         <div class="bar"></div>
-        <div class="bar"></div>
-        <div class="bar"></div>
+        <div class="bar"></div> -->
+
+   <button id="export" class="button" onclick="exportSession()">
+        Export Session
+      </button>
 
       </div>
 
@@ -32,34 +38,42 @@
       Holographic Patient Dialogue
     </div>
 
+<div> <!-- test div -->
     <div class="container container-input">
-      <div style="font-weight: bold; font-size:40px; margin: auto"  id="tokenInput"></div>
-  		<!--<input id="userinput" class="input-field" value=""></input>-->
       <button id="newpage" class="button" onclick="previousWord()">
         Previous Word
       </button>
-      <button id="newpage" class="button" onclick="nextWord()">
+      <div style="font-weight: bold; font-size:40px; margin: auto"  id="tokenInput"></div>
+  		<!--<input id="userinput" class="input-field" value=""></input>-->
+      
+      <button id="newpageNext" class="button" onclick="nextWord()">
         Next Word
       </button>
       
 
   	</div>
 
-   
+   <div class="words" contenteditable>
+
+  </div>
 
     <div class="container container-wiki">
       <div id="img">
         <!-- placeholder for wikipedia image-->
-      </div>
+      </div> 
+      
       </div>
       <div class="container container-wikiimage">
       <div id="wiki_intro">
         <!-- placeholder for wikipedia text-->
       </div>
-      
-   
+
 
     </div>
+</div> <!-- test div end -->
+
+
 
   </body>
+  <script src="script.js" async></script>
 </html>
