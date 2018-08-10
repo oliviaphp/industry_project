@@ -34,6 +34,8 @@ window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecogn
 
 
 var originalArray = new Array(); // stores medical entities 
+var jsonStorage = new Array(); // stores all the information from the session
+     
 
 function nextWord() {
 
@@ -78,15 +80,28 @@ function previousWord() {
 
 }
 
-
+// extracts biomedical terms from cTAKES
 function biomedicalExtractor(dictation) {
 
-// retrives biomedical words from cTAKES
-//$(document).ready(function(){
-    $.ajax({
+    //  $.ajaxPrefilter(function (options) {
+    //     if (options.crossDomain && jQuery.support.cors) {
+    //         var https = (window.location.protocol === 'http:' ? 'http:' : 'https:');
+    //         options.url = https + '//cors-anywhere.herokuapp.com/' + options.url;
+    //     }
+    // });
+var URL = "http://localhost:9999/ctakes?text=" + dictation;
+    
+    $.ajax({ 
+
         //url: "http://localhost:9999/ctakes?text=I%20would%20suggest%20taking%20paracetamol%20for%20your%20headache%20and%20possibly%20aspirin%20or%20codeine",
         url: "http://localhost:9999/ctakes?text=" + dictation,
         dataType: 'json',
+        // headers: {
+        //     'Access-Control-Allow-Origin': URL,
+        //     //'Access-Control-Allow-Origin': '*',
+        //     'Access-Control-Allow-Methods' : "GET, HEAD, POST, PUT, OPTIONS",
+        //     'Access-Control-Allow-Headers': 'X-Custom-Header'
+        // },   
         success: function(data) {
         var jcontent = data; // assigns the data from the JSON file to the variable jcontent
 
@@ -101,32 +116,25 @@ function biomedicalExtractor(dictation) {
                             $.each(value.annotation , function(key, value){  
                                 if(key == "canonicalForm") {
                                     // ensures no duplicates in array
-                                    originalArray.indexOf(value) === -1 ? originalArray.push(value) : console.log("This item already exists");
-                                    // document.getElementById("tokenInput").innerHTML = token;
-                                    getWiki(value); //passes the token value to getWiki to retrieve the info
-                                    console.log(originalArray);
+                                    originalArray.indexOf(value) === -1 ? originalArray.push(value) && getWiki(value): console.log("This item already exists");
+                                    //getWiki(value); //passes the token value to getWiki to retrieve the info
+                                    console.log(originalArray); 
+                                    }
 
-                                    
-                            }
-
-                            }); 
+                                }); 
                             
-                        });
+                            });
 
+                        }
 
-                    }
-
-
-
-                 });
+                    });
 
                 }
              });
-       //getWiki(originalArray[0]);
-    }
-});
+            //getWiki(originalArray[0]);
+        }
+    });
     
-//});
 }
 
 
@@ -134,15 +142,19 @@ function biomedicalExtractor(dictation) {
 // retrives text information about word
 function getWiki(token) {
 
+    // $.ajaxPrefilter(function (options) {
+    //     if (options.crossDomain && jQuery.support.cors) {
+    //         var https = (window.location.protocol === 'http:' ? 'http:' : 'https:');
+    //         options.url = https + '//cors-anywhere.herokuapp.com/' + options.url;
+    //     }
+    // });
         // recieves article summary at top of Wiki page
         var URL = 'https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro=&explaintext&=';
 
-        //var place = document.getElementById('userinput').value;
-        //var place = token;
         URL += "&titles=" + token;
         URL += "&rvprop=content";
         URL += "&callback=?";
-        //console.log(URL);
+        console.log(URL);
         $.getJSON(URL, function (data) {
             var obj = data.query.pages;
             var ob = Object.keys(obj)[0];
@@ -153,22 +165,7 @@ function getWiki(token) {
         
             imageWiki(token);
 
-
         });
-
-        // avoids cross-origin-policy
-    //     $.ajaxPrefilter(function (options) {
-    //     if (options.crossDomain && jQuery.support.cors) {
-    //         var https = (window.location.protocol === 'http:' ? 'http:' : 'https:');
-    //         options.url = https + '//cors-anywhere.herokuapp.com/' + options.url;
-    //     }
-        
-    // });
-
-
-    
-
-
 
         
 function setButtonColor(color) {
@@ -179,6 +176,7 @@ function setButtonColor(color) {
 
 }
 
+var imageURLS;
 // retrives images
 function imageWiki(token) {
     $("#img").html(""); // clears contents from earlier searches
@@ -192,7 +190,6 @@ function imageWiki(token) {
 
     $.get(
         'https://en.wikipedia.org/w/api.php?action=parse&format=json&prop=text&section=0&page=' + token + '&callback=?',
-        //'https://en.wikipedia.org/w/api.php?action=query&titles=' + token + '&prop=images', // na        
 
     function (response) {
         var m;
@@ -206,27 +203,77 @@ function imageWiki(token) {
 
         urls.forEach(function (url) {
             $("#img").append('<img src="' + window.location.protocol + url + '">');
+            
         });
+        
+        imageURLS = urls;
+
+        //-------------------------------------------------
+        //var jsonObject = new Array();
+        var medical = document.getElementById("tokenInput").innerHTML;
+
+        // store term, info, and image urls to store in json file
+        var jsonObject = {
+        "Medical_Term": document.getElementById("tokenInput").innerHTML,
+        "Description": document.getElementById("wiki_intro").innerHTML,
+        "Images": imageURLS,       
+        };
+
+        jsonStorage.push(jsonObject);
+                
     });
 
-    //console.log('https://en.wikipedia.org/w/api.php?action=parse&format=json&prop=text&section=0&page=' + token + '&callback=?');
 }
 
-// exports the session into an XML/JSON format
+// exports the session into JSON format
 function exportSession() {
     if(originalArray.length == 0) {
         alert("Nothing to export");
     }
     else {
-        alert("Session exported");
-        var fs = require("fs");
-        fs.writeFile("./object.json", JSON.stringify(originalArray, null, 4), (err) => {
-            if (err) {
-                console.error(err);
-                return;
-            };
-            console.log("File has been created");
-        });
-    }
-}
+        console.log(jsonStorage);
+        alert("Session Exported. To start another session, press the 'New Session' button");
 
+        // code below is adapted from https://medium.com/@danny.pule/export-json-to-csv-file-using-javascript-a0b7bc5b00d2
+
+       var jsonObject = JSON.stringify(jsonStorage); // makes data readable on exported file
+       var csv = jsonObject;
+
+       var fileTitle = 'session';
+
+       var exportedFilename = fileTitle + '.txt' || 'export.txt'; // to change to csv file: fileTitle + '.csv' || 'export.csv'
+
+       var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        if (navigator.msSaveBlob) { // IE 10+
+            navigator.msSaveBlob(blob, exportedFilename);
+        } else {
+            var link = document.createElement("a");
+            if (link.download !== undefined) { // feature detection
+                // Browsers that support HTML5 download attribute
+                var url = URL.createObjectURL(blob);
+                link.setAttribute("href", url);
+                link.setAttribute("download", exportedFilename);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+
+        }
+
+        // clears contents from that session
+         $("#img").html(""); 
+         $("#wiki_intro").html("");
+         $("#tokenInput").html("");
+         originalArray.length = 0;
+         //jsonObject.length = 0;
+         jsonStorage.length = 0;
+         console.log(originalArray);
+         //console.log(jsonObject);
+         console.log(jsonStorage);
+
+
+
+    }
+
+}
