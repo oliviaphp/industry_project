@@ -21,9 +21,7 @@ window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecogn
 
       if (e.results[0].isFinal) {
         var text = transcript;
-        //console.log(text);
         dictation = encodeURIComponent(text.trim()); //replaces spaces with %20 to become a URL
-        //console.log(dictation);
         biomedicalExtractor(dictation); // passes the text in URL format to biomedicalExtractor function
 
        }
@@ -35,6 +33,8 @@ window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecogn
 
 var originalArray = new Array(); // stores medical entities 
 var jsonStorage = new Array(); // stores all the information from the session
+var newArray = new Array(); // stores buttons under Session Terms
+var check = new Array(); // helps to ensure no duplicates in exported JSON file
      
 
 function nextWord() {
@@ -44,7 +44,6 @@ function nextWord() {
         if(originalArray[i] == document.getElementById("tokenInput").innerHTML) {
             if(originalArray[i] != originalArray[originalArray.length - 1]) {
                     var next = originalArray[i+1]; // gets the next word in the array
-                    //console.log(next);
                     getWiki(next);
 
                     break;
@@ -64,7 +63,6 @@ function previousWord() {
             if(originalArray[i] == document.getElementById("tokenInput").innerHTML) {
                 if(originalArray[i] != originalArray[0]) {
                     var prev = originalArray[i-1]; // gets the previous word in the array
-                    //console.log(prev);
                     getWiki(prev);
                 }
                 else {
@@ -72,15 +70,58 @@ function previousWord() {
                 }
 
             }
-        
-
 
     }
     //;
 
 }
 
-// extracts biomedical terms from cTAKES
+// deletes word
+function deleteWord() {
+
+    if(originalArray.length == 0) {
+        alert("Session is empty. Nothing to delete");
+    }
+    else { // delete word from arrays    
+        for(var j = 0; j < check.length; j++) { // delete from check array
+            if(check[j] == document.getElementById("tokenInput").innerHTML) {
+                check.splice(j, 1);
+            }
+        }
+
+        $(jsonStorage).each(function(index, value){ // delete from jsonStorage
+            if(value.Medical_Term == document.getElementById("tokenInput").innerHTML) {
+                jsonStorage.splice(index, 1);
+            }
+        });
+
+        var lastElement = originalArray[originalArray.length - 1];
+
+        for(var i = 0; i < originalArray.length; i++) { // delete from originalArray and change app display
+            if(originalArray[i] == document.getElementById("tokenInput").innerHTML) { 
+                var wordDelete = originalArray[i];
+                if(wordDelete == lastElement){
+                    var prev = originalArray[i-1];
+                    originalArray.splice(i, 1);
+                    getWiki(prev);
+                }
+                else {
+                    var next = originalArray[i+1];
+                    originalArray.splice(i, 1);
+                    getWiki(next);
+                    }
+                
+                }
+                
+            }
+        }
+            
+        showArray(originalArray);
+    }
+            
+
+
+// extracts biomedical terms from speech using cTAKES
 function biomedicalExtractor(dictation) {
 
     //  $.ajaxPrefilter(function (options) {
@@ -111,14 +152,14 @@ var URL = "http://localhost:9999/ctakes?text=" + dictation;
                 current = jcontent[index];
                 next = jcontent[index+1]; //gets the next index after WordToken
                  $(next).each(function(index, value){ // this will ensure we return the correct word
-                    if(value.typ == "org.apache.ctakes.typesystem.type.textsem.MedicationMention") {
+                    if(value.typ == "org.apache.ctakes.typesystem.type.textsem.MedicationMention" || value.typ == "org.apache.ctakes.typesystem.type.textsem.SignSymptomMention" || value.typ == "org.apache.ctakes.typesystem.type.textsem.DiseaseDisorderMention"
+                        || value.typ == "org.apache.ctakes.typesystem.type.textsem.ProcedureMention" || value.typ == "org.apache.ctakes.typesystem.type.textsem.AnatomicalSiteMention") {
                         $(current).each(function(key, value) {
                             $.each(value.annotation , function(key, value){  
                                 if(key == "canonicalForm") {
                                     // ensures no duplicates in array
-                                    originalArray.indexOf(value) === -1 ? originalArray.push(value) && getWiki(value): console.log("This item already exists");
-                                    //getWiki(value); //passes the token value to getWiki to retrieve the info
-                                    console.log(originalArray); 
+                                    originalArray.indexOf(value) === -1 ? originalArray.push(value) && getWiki(value) : console.log(""); 
+                                    showArray(originalArray);
                                     }
 
                                 }); 
@@ -137,6 +178,29 @@ var URL = "http://localhost:9999/ctakes?text=" + dictation;
     
 }
 
+// displays the originalArray under Term Log
+// this allows users to go directly to the page they want
+function showArray(array) {
+    $("#logs").html("");
+
+    newArray = array.join("\n"); // puts each array element on new line
+    var newArray = array.slice(' ');
+
+    // adding buttons based on input and creating dynamic ids
+    for (var i = 0; i < newArray.length; i++) {
+        document.getElementById("logs").innerHTML += "<button class='button' id=myId"+i+">" + newArray[i] + "</button>" + "\n";
+   }
+
+   // if button is clicked, go to relevant page
+   $("button").click(function() {
+        var theValue=$(this).text(); // get the button text
+
+        for(var j = 0; j < originalArray.length; j++) {
+            originalArray[j] == theValue ? getWiki(theValue) : console.log("");
+        }
+    });
+
+}
 
 
 // retrives text information about word
@@ -154,7 +218,7 @@ function getWiki(token) {
         URL += "&titles=" + token;
         URL += "&rvprop=content";
         URL += "&callback=?";
-        console.log(URL);
+
         $.getJSON(URL, function (data) {
             var obj = data.query.pages;
             var ob = Object.keys(obj)[0];
@@ -175,6 +239,8 @@ function setButtonColor(color) {
 }
 
 }
+
+
 
 var imageURLS;
 // retrives images
@@ -209,8 +275,8 @@ function imageWiki(token) {
         imageURLS = urls;
 
         //-------------------------------------------------
-        //var jsonObject = new Array();
-        var medical = document.getElementById("tokenInput").innerHTML;
+        //var medical = document.getElementById("tokenInput").innerHTML;
+
 
         // store term, info, and image urls to store in json file
         var jsonObject = {
@@ -218,12 +284,23 @@ function imageWiki(token) {
         "Description": document.getElementById("wiki_intro").innerHTML,
         "Images": imageURLS,       
         };
+    
 
+        // algorithm to ensure no duplicates in exported JSON file
+       if(check.length != 0) {
+        $.each(check, function(index, value) {
+            check.indexOf(jsonObject.Medical_Term) === -1 ? check.push(jsonObject.Medical_Term) && jsonStorage.push(jsonObject) : console.log("");
+        });
+       }
+       else {
+        check.push(jsonObject.Medical_Term);
         jsonStorage.push(jsonObject);
-                
+       }        
+        
     });
 
 }
+
 
 // exports the session into JSON format
 function exportSession() {
@@ -231,10 +308,9 @@ function exportSession() {
         alert("Nothing to export");
     }
     else {
-        console.log(jsonStorage);
-        alert("Session Exported. To start another session, press the 'New Session' button");
+        alert("Session Exported");
 
-        // code below is adapted from https://medium.com/@danny.pule/export-json-to-csv-file-using-javascript-a0b7bc5b00d2
+// code below is adapted from https://medium.com/@danny.pule/export-json-to-csv-file-using-javascript-a0b7bc5b00d2
 
        var jsonObject = JSON.stringify(jsonStorage); // makes data readable on exported file
        var csv = jsonObject;
@@ -262,18 +338,18 @@ function exportSession() {
         }
 
         // clears contents from that session
+        // this refreshes the page for a new session 
          $("#img").html(""); 
          $("#wiki_intro").html("");
          $("#tokenInput").html("");
+         $("#logs").html(""); 
          originalArray.length = 0;
-         //jsonObject.length = 0;
          jsonStorage.length = 0;
-         console.log(originalArray);
-         //console.log(jsonObject);
-         console.log(jsonStorage);
+         check.length = 0;
 
 
 
     }
 
 }
+

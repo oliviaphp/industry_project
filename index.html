@@ -1,81 +1,102 @@
 <!DOCTYPE html> 
 
-  <head>
-    <meta charset="utf-8">
-    <!-- <meta name="viewport" content="width=device-width, initial-scale=0.56, maximum-scale=0.56,user-scalable=0"/> -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   
-    <title>HPD</title>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=0.56, maximum-scale=0.56,user-scalable=0"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!--<link rel="shortcut icon" href="resources/favicon.ico">-->
-    <link rel="stylesheet" href="styles.css">
+	<title>HPD</title>
+
+	<!--<link rel="shortcut icon" href="resources/favicon.ico">-->
+	<link rel="stylesheet" href="styles.css">
 
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 
-    
-    <!--<script src="SpeechToText-WebSockets-Javascript/distrib//speech.sdk.bundle.js"></script>-->
-   
 
-  </head>
+</head>
 
-  <body>
-    <header class="header">
+<body>
+	<header class="header">
 
-      <div class="menubutton">
-        <!-- <div class="bar"></div>
-        <div class="bar"></div>
-        <div class="bar"></div> -->
 
-   <button id="export" class="button" onclick="exportSession()">
-        Stop and Export Session
-      </button>
-  
-      </div>
 
-    </header>
+		<div class="menubutton">
 
-    <div class="container title">
-      Holographic Patient Dialogue
-    </div>
+		<button id="delete" class="button" style="float: right" color="red" onclick="deleteWord()">
+				Delete Word
+			</button>
 
-<div> <!-- test div -->
-    <div class="container container-input">
-      <button id="newpage" class="button" onclick="previousWord()">
-        Previous Word
-      </button>
-      <div style="font-weight: bold; font-size:40px; margin: auto"  id="tokenInput"></div>
-  		<!--<input id="userinput" class="input-field" value=""></input>-->
-      
-      <button id="newpageNext" class="button" onclick="nextWord()">
-        Next Word
-      </button>
-      
-
-  	</div>
-
-   <div class="words" contenteditable>
-
-  </div>
-
-    <div class="container container-wiki">
-      <div id="img">
-        <!-- placeholder for wikipedia image-->
-      </div> 
-      
-      </div>
-      <div class="container container-wikiimage">
-      <div id="wiki_intro">
-        <!-- placeholder for wikipedia text-->
-      </div>
-
+        <button id="export" class="button" onclick="exportSession()">
+        	Stop and Export Session
+        </button>
 
     </div>
-</div> <!-- test div end -->
+
+</header>
+
+<div class="container title">
+	Holographic Patient Dialogue
+</div>
 
 
 
-  </body>
-  <!--<script src="script.js" async></script>-->
-  <script src="script.js"></script>
+<div id="wrapper">
+	<div id="leftcolumn" style="float: left; width: 1150px">
+		<div class="container container-input">
+			<button id="newpage" class="button" onclick="previousWord()">
+				Previous Word
+			</button>
+			<div style="font-weight: bold; font-size:40px; margin: auto"  id="tokenInput"></div>
+			<!--<input id="userinput" class="input-field" value=""></input>-->
+
+			<button id="newpageNext" class="button" onclick="nextWord()">
+				Next Word
+			</button>
+
+
+		</div>
+
+
+
+		<div class="words" contenteditable>
+
+		</div>
+
+		<div class="container container-wiki">
+			<div id="img">
+				<!-- placeholder for wikipedia image-->
+			</div> 
+
+		</div>
+		<div class="container container-wikiimage">
+			<div id="wiki_intro">
+				<!-- placeholder for wikipedia text-->
+			</div>
+
+
+		</div>
+
+		
+	</div> <!-- container container-input -->
+
+</div><!-- left column -->
+<div id="right colomn" style="float: right; width: 260px">
+
+	<h2> Session Terms </h2>
+	<div id="logs">
+		<!--placeholder for list of medical terms in session-->
+	</div>
+	<!--</div>-->
+</div> <!-- Right column -->
+
+
+</div> <!-- Wrapper div -->
+
+
+
+
+</body>
+
+<script src="script.js"></script>
 </html>

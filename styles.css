@@ -7,6 +7,39 @@
   --color-border: #90B1F2;
 }
 
+/*#wrapper {
+     width: 1005px;
+     margin: 0 auto;
+}*/
+
+/*#leftcolumn, #rightcolumn {
+    border: 1px solid white;
+    float: left;
+    min-height: 450px;
+    color: white;
+}
+#leftcolumn {
+     width: 750px;
+
+
+}
+
+#rightcolumn {
+     width: 250px;
+
+
+}*/
+
+.containerLogs {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 73%;
+  margin: auto;
+  /*padding-top: 15px;*/
+  /*padding-left: 70px;*/
+}
+
 .container {
   display: flex;
   align-items: center;
@@ -14,6 +47,17 @@
   max-width: 73%;
   margin: auto;
   padding-top: 15px;
+
+}
+
+.termLogContainer {
+  display: flex;
+  align-items: right;
+  justify-content: center;
+  max-width: 73%;
+  margin: auto;
+  padding-top: 15px;
+
 
 }
 
