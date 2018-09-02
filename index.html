@@ -5,26 +5,26 @@
 	<meta name="viewport" content="width=device-width, initial-scale=0.56, maximum-scale=0.56,user-scalable=0"/>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-	<title>HPD</title>
+	<title>Holographic Patient Dialogue</title>
 
 	<!--<link rel="shortcut icon" href="resources/favicon.ico">-->
 	<link rel="stylesheet" href="styles.css">
 
 
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script src="azure-storage.blob.js"></script> <!-- to access Azure blob storage -->
 
 
 </head>
 
 <body>
+
 	<header class="header">
-
-
 
 		<div class="menubutton">
 
-		<button id="delete" class="button" style="float: right" color="red" onclick="deleteWord()">
-				Delete Word
+		<button id="delete" class="button" style="float: right" background-color="red" onclick="deleteWord()">
+				Delete Term
 			</button>
 
         <button id="export" class="button" onclick="exportSession()">
@@ -40,30 +40,29 @@
 </div>
 
 
-
 <div id="wrapper">
 	<div id="leftcolumn" style="float: left; width: 1150px">
 		<div class="container container-input">
 			<button id="newpage" class="button" onclick="previousWord()">
-				Previous Word
+				Previous Term
 			</button>
 			<div style="font-weight: bold; font-size:40px; margin: auto"  id="tokenInput"></div>
-			<!--<input id="userinput" class="input-field" value=""></input>-->
 
 			<button id="newpageNext" class="button" onclick="nextWord()">
-				Next Word
+				Next Term
 			</button>
 
 
-		</div>
+		</div>	
 
-
+		<div style="text-align: center; font-weight: bold; margin: auto" id="snomed"></div>
 
 		<div class="words" contenteditable>
 
 		</div>
+		<div class="loader" id="showLoader"></div> 
 
-		<div class="container container-wiki">
+		<div class="container container-wiki animate-bottom">
 			<div id="img">
 				<!-- placeholder for wikipedia image-->
 			</div> 

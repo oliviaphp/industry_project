@@ -1,18 +1,31 @@
+$('#showLoader').hide(); // hides the loading icon
+
+var originalArray = new Array(); // stores medical entities 
+var jsonStorage = new Array(); // stores all the information from the session
+var newArray = new Array(); // stores buttons under Session Terms
+var check = new Array(); // helps to ensure no duplicates in exported JSON file
+
+var snomedCode; // contains the snomed code for a particular medical entity
+var snomedArray = new Array();
 
 // Speech to text
-// speech-to-text algorihtm adapted from https://github.com/wesbos/JavaScript30/blob/master/20%20-%20Speech%20Detection/index-FINISHED.html
+// speech-to-text algorithm adapted from https://github.com/wesbos/JavaScript30/blob/master/20%20-%20Speech%20Detection/index-FINISHED.html
 
-var dictation; // stores the word that we want to pass to the biomedical extractor
+var dictation; // stores the text that we want to pass to the biomedical extractor
 
-
+// set recognition interface to SpeechRecognition regardless of what browser the user is on
 window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  const recognition = new SpeechRecognition();
-  recognition.interimResults = true;
-  recognition.lang = 'en-US';
+
+//instatiate speech recognition interface
+const recognition = new SpeechRecognition();
+recognition.interimResults = true; // supports interim results
+recognition.lang = 'en-US';
   
   let p = document.createElement('p');
   const words = document.querySelector('.words');
   words.appendChild(p);
+
+  // dictate
   recognition.addEventListener('result', e => {
     const transcript = Array.from(e.results)
       .map(result => result[0])
@@ -23,19 +36,15 @@ window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecogn
         var text = transcript;
         dictation = encodeURIComponent(text.trim()); //replaces spaces with %20 to become a URL
         biomedicalExtractor(dictation); // passes the text in URL format to biomedicalExtractor function
+        
 
        }
   });
+
   recognition.addEventListener('end', recognition.start); // this means the app will conitnue to listen even if there is a pause
   recognition.start();
 
-
-
-var originalArray = new Array(); // stores medical entities 
-var jsonStorage = new Array(); // stores all the information from the session
-var newArray = new Array(); // stores buttons under Session Terms
-var check = new Array(); // helps to ensure no duplicates in exported JSON file
-     
+// end of speech-to-text
 
 function nextWord() {
 
@@ -73,7 +82,6 @@ function previousWord() {
 
     }
     //;
-
 }
 
 // deletes word
@@ -82,7 +90,7 @@ function deleteWord() {
     if(originalArray.length == 0) {
         alert("Session is empty. Nothing to delete");
     }
-    else { // delete word from arrays    
+    else { // delete word  
         for(var j = 0; j < check.length; j++) { // delete from check array
             if(check[j] == document.getElementById("tokenInput").innerHTML) {
                 check.splice(j, 1);
@@ -95,9 +103,18 @@ function deleteWord() {
             }
         });
 
+        // delete from snomed array
+        console.log(document.getElementById("snomed").innerHTML);
+        for(var k = 0; k < snomedArray.length; k++) {
+            if(snomedArray[k] == document.getElementById("snomed").innerHTML) {
+                snomedArray.splice(k, 1);
+            }
+        }
+
         var lastElement = originalArray[originalArray.length - 1];
 
-        for(var i = 0; i < originalArray.length; i++) { // delete from originalArray and change app display
+        // delete from originalArray and change app display
+        for(var i = 0; i < originalArray.length; i++) { 
             if(originalArray[i] == document.getElementById("tokenInput").innerHTML) { 
                 var wordDelete = originalArray[i];
                 if(wordDelete == lastElement){
@@ -121,7 +138,7 @@ function deleteWord() {
             
 
 
-// extracts biomedical terms from speech using cTAKES
+// extracts biomedical terms from text using cTAKES
 function biomedicalExtractor(dictation) {
 
     //  $.ajaxPrefilter(function (options) {
@@ -130,11 +147,10 @@ function biomedicalExtractor(dictation) {
     //         options.url = https + '//cors-anywhere.herokuapp.com/' + options.url;
     //     }
     // });
-var URL = "http://localhost:9999/ctakes?text=" + dictation;
+
+    var URL = "http://localhost:9999/ctakes?text=" + dictation;
     
     $.ajax({ 
-
-        //url: "http://localhost:9999/ctakes?text=I%20would%20suggest%20taking%20paracetamol%20for%20your%20headache%20and%20possibly%20aspirin%20or%20codeine",
         url: "http://localhost:9999/ctakes?text=" + dictation,
         dataType: 'json',
         // headers: {
@@ -152,17 +168,34 @@ var URL = "http://localhost:9999/ctakes?text=" + dictation;
                 current = jcontent[index];
                 next = jcontent[index+1]; //gets the next index after WordToken
                  $(next).each(function(index, value){ // this will ensure we return the correct word
-                    if(value.typ == "org.apache.ctakes.typesystem.type.textsem.MedicationMention" || value.typ == "org.apache.ctakes.typesystem.type.textsem.SignSymptomMention" || value.typ == "org.apache.ctakes.typesystem.type.textsem.DiseaseDisorderMention"
-                        || value.typ == "org.apache.ctakes.typesystem.type.textsem.ProcedureMention" || value.typ == "org.apache.ctakes.typesystem.type.textsem.AnatomicalSiteMention") {
-                        $(current).each(function(key, value) {
-                            $.each(value.annotation , function(key, value){  
+                    if(value.typ == "org.apache.ctakes.typesystem.type.textsem.MedicationMention" || value.typ == "org.apache.ctakes.typesystem.type.textsem.SignSymptomMention" 
+                        || value.typ == "org.apache.ctakes.typesystem.type.textsem.DiseaseDisorderMention" || value.typ == "org.apache.ctakes.typesystem.type.textsem.ProcedureMention" 
+                        || value.typ == "org.apache.ctakes.typesystem.type.textsem.AnatomicalSiteMention") {
+                        $.each(value.annotation , function(key, value){   // get snomed code for value                               
+                         if(key == "ontologyConceptArr") {
+                            var position = value[0];
+                            $(position).each(function(key, value) {
+                                $.each(value.annotation , function(key, value){
+                                    if(key == "code") {
+                                        snomedCode = value; // snomed code 
+                                        snomedArray.indexOf(value) === -1 ? snomedArray.push(value) : console.log(""); // if no duplicates, add to snomedArray    
+                                        }
+                                    });
+                                });
+                             }
+                            }); // end of get snomed code
+                        $(current).each(function(key, value) {                           
+                            $.each(value.annotation , function(key, value){  // get medical term to pass to getWiki
                                 if(key == "canonicalForm") {
+                                    console.log(value);
                                     // ensures no duplicates in array
                                     originalArray.indexOf(value) === -1 ? originalArray.push(value) && getWiki(value) : console.log(""); 
                                     showArray(originalArray);
                                     }
 
                                 }); 
+
+                            
                             
                             });
 
@@ -205,6 +238,9 @@ function showArray(array) {
 
 // retrives text information about word
 function getWiki(token) {
+    //console.log("Thinking..."); // informs the user that it has picked up their speech and is processing it
+    
+    $('#showLoader').show(); // shows loading icon to let user know the app is processing the information
 
     // $.ajaxPrefilter(function (options) {
     //     if (options.crossDomain && jQuery.support.cors) {
@@ -212,6 +248,7 @@ function getWiki(token) {
     //         options.url = https + '//cors-anywhere.herokuapp.com/' + options.url;
     //     }
     // });
+
         // recieves article summary at top of Wiki page
         var URL = 'https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro=&explaintext&=';
 
@@ -224,8 +261,26 @@ function getWiki(token) {
             var ob = Object.keys(obj)[0];
             //console.log(obj[ob]["extract"]);  
 
+            // get correct snomed code
+            var snomedIndex;
+            var code;
+
+            for(var i = 0; i < originalArray.length; i++) {
+            originalArray[i] == token ? snomedIndex = i : console.log("");
+            }
+
+
+            for(var j = 0; j <= snomedArray.length; j++) {
+                j == snomedIndex ? code = snomedArray[j]: console.log("");
+            }
+
+
+            // display info on page
             document.getElementById("tokenInput").innerHTML = token;
             document.getElementById("wiki_intro").innerHTML = obj[ob]["extract"];
+            document.getElementById("snomed").innerHTML = code;
+
+            $('#showLoader').hide();
         
             imageWiki(token);
 
@@ -274,9 +329,6 @@ function imageWiki(token) {
         
         imageURLS = urls;
 
-        //-------------------------------------------------
-        //var medical = document.getElementById("tokenInput").innerHTML;
-
 
         // store term, info, and image urls to store in json file
         var jsonObject = {
@@ -289,7 +341,7 @@ function imageWiki(token) {
         // algorithm to ensure no duplicates in exported JSON file
        if(check.length != 0) {
         $.each(check, function(index, value) {
-            check.indexOf(jsonObject.Medical_Term) === -1 ? check.push(jsonObject.Medical_Term) && jsonStorage.push(jsonObject) : console.log("");
+            check.indexOf(jsonObject.Medical_Term) === -1 ? check.push(jsonObject.Medical_Term) && jsonStorage.push(jsonObject) : console.log("Duplicate");
         });
        }
        else {
@@ -310,19 +362,22 @@ function exportSession() {
     else {
         alert("Session Exported");
 
+    var d = new Date();
+
 // code below is adapted from https://medium.com/@danny.pule/export-json-to-csv-file-using-javascript-a0b7bc5b00d2
 
-       var jsonObject = JSON.stringify(jsonStorage); // makes data readable on exported file
-       var csv = jsonObject;
+        // converts object to JSON
+       var jsonFile = JSON.stringify(jsonStorage, null, "\t"); // makes data readable on exported file
+       var csv = jsonFile;
 
-       var fileTitle = 'session';
+       var fileTitle = d; // names the exported file
 
-       var exportedFilename = fileTitle + '.txt' || 'export.txt'; // to change to csv file: fileTitle + '.csv' || 'export.csv'
+       var exportedFilename = fileTitle + '.json' || 'export.json'; // to change to csv file: fileTitle + '.csv' || 'export.csv'
 
-       var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-        if (navigator.msSaveBlob) { // IE 10+
+       var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); // creating blob and inserting data into the blob
+        if (navigator.msSaveBlob) { // if browser supports saving of blobs
             navigator.msSaveBlob(blob, exportedFilename);
-        } else {
+        } else { // if browser doesn't support saving of blobs
             var link = document.createElement("a");
             if (link.download !== undefined) { // feature detection
                 // Browsers that support HTML5 download attribute
@@ -343,13 +398,36 @@ function exportSession() {
          $("#wiki_intro").html("");
          $("#tokenInput").html("");
          $("#logs").html(""); 
+         $("#snomed").html(""); 
          originalArray.length = 0;
          jsonStorage.length = 0;
          check.length = 0;
-
-
-
+         snomedArray.length = 0; // just added, hopefully okay
     }
 
+
+    // upload to Azure blob storage
+    // this code is adapted from https://dmrelease.blob.core.windows.net/azurestoragejssample/samples/sample-blob.html
+    var blobUri = 'https://' + 'medicalwebapp' + '.blob.core.windows.net';
+    var blobService = AzureStorage.Blob.createBlobServiceWithSas(blobUri, '?sv=2017-11-09&ss=b&srt=sco&sp=rwdlac&se=2018-09-02T22:07:22Z&st=2018-09-02T14:07:22Z&spr=https&sig=KHUZ9JPGV%2FmwiJoFBZ%2FH%2F%2B6NOZQ1mRAJhn1S3pT4Kn0%3D');
+    var file = exportedFilename;
+
+    var customBlockSize = file.size > 1024 * 1024 * 32 ? 1024 * 1024 * 4 : 1024 * 512;
+    blobService.singleBlobPutThresholdInBytes = customBlockSize;
+
+    var finishedOrError = false;
+    var speedSummary = blobService.createBlockBlobFromText('sessiondata', d + '.json', csv, function(error, result, response) {
+    finishedOrError = true;
+    if (error) {
+        console.log("Upload Blob failed");
+    } else {
+        // Upload successful
+    }
+        });
+
+
+
 }
+
+
 
