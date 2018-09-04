@@ -8,6 +8,7 @@ var check = new Array(); // helps to ensure no duplicates in exported JSON file
 var snomedCode; // contains the snomed code for a particular medical entity
 var snomedArray = new Array();
 
+
 // Speech to text
 // speech-to-text algorithm adapted from https://github.com/wesbos/JavaScript30/blob/master/20%20-%20Speech%20Detection/index-FINISHED.html
 
@@ -16,7 +17,7 @@ var dictation; // stores the text that we want to pass to the biomedical extract
 // set recognition interface to SpeechRecognition regardless of what browser the user is on
 window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-//instatiate speech recognition interface
+// instantiate speech recognition interface
 const recognition = new SpeechRecognition();
 recognition.interimResults = true; // supports interim results
 recognition.lang = 'en-US';
@@ -41,14 +42,15 @@ recognition.lang = 'en-US';
        }
   });
 
-  recognition.addEventListener('end', recognition.start); // this means the app will conitnue to listen even if there is a pause
+  recognition.addEventListener('end', recognition.start); // this means the app will continue to listen even if there is a pause
   recognition.start();
 
 // end of speech-to-text
 
+// navigate to next word
 function nextWord() {
 
-    //traverse through originalArray to chech which index matches the element on the screen
+    //traverse through originalArray to check which index matches the element on the screen
     for(var i = 0; i < originalArray.length; i++) {
         if(originalArray[i] == document.getElementById("tokenInput").innerHTML) {
             if(originalArray[i] != originalArray[originalArray.length - 1]) {
@@ -66,8 +68,9 @@ function nextWord() {
         }
     }
 
+// navigate to previous word
 function previousWord() {
-    // traverse through originalArray to chech which index matches the element on the screen
+    // traverse through originalArray to check which index matches the element on the screen
     for(var i = 0; i < originalArray.length; i++) {
             if(originalArray[i] == document.getElementById("tokenInput").innerHTML) {
                 if(originalArray[i] != originalArray[0]) {
@@ -81,7 +84,7 @@ function previousWord() {
             }
 
     }
-    //;
+
 }
 
 // deletes word
@@ -141,30 +144,17 @@ function deleteWord() {
 // extracts biomedical terms from text using cTAKES
 function biomedicalExtractor(dictation) {
 
-    //  $.ajaxPrefilter(function (options) {
-    //     if (options.crossDomain && jQuery.support.cors) {
-    //         var https = (window.location.protocol === 'http:' ? 'http:' : 'https:');
-    //         options.url = https + '//cors-anywhere.herokuapp.com/' + options.url;
-    //     }
-    // });
-
     var URL = "http://localhost:9999/ctakes?text=" + dictation;
     
     $.ajax({ 
         url: "http://localhost:9999/ctakes?text=" + dictation,
-        dataType: 'json',
-        // headers: {
-        //     'Access-Control-Allow-Origin': URL,
-        //     //'Access-Control-Allow-Origin': '*',
-        //     'Access-Control-Allow-Methods' : "GET, HEAD, POST, PUT, OPTIONS",
-        //     'Access-Control-Allow-Headers': 'X-Custom-Header'
-        // },   
+        dataType: 'json', 
         success: function(data) {
         var jcontent = data; // assigns the data from the JSON file to the variable jcontent
 
         // read the JSON file and extract the biomedical words
         $(jcontent).each(function(index, value){ // iterates through jcontent
-             if(value.typ == "org.apache.ctakes.typesystem.type.syntax.WordToken") { // WordToken is where the enitiy is stored
+             if(value.typ == "org.apache.ctakes.typesystem.type.syntax.WordToken") { // WordToken is where the entity is stored
                 current = jcontent[index];
                 next = jcontent[index+1]; //gets the next index after WordToken
                  $(next).each(function(index, value){ // this will ensure we return the correct word
@@ -187,15 +177,12 @@ function biomedicalExtractor(dictation) {
                         $(current).each(function(key, value) {                           
                             $.each(value.annotation , function(key, value){  // get medical term to pass to getWiki
                                 if(key == "canonicalForm") {
-                                    console.log(value);
                                     // ensures no duplicates in array
                                     originalArray.indexOf(value) === -1 ? originalArray.push(value) && getWiki(value) : console.log(""); 
                                     showArray(originalArray);
                                     }
 
-                                }); 
-
-                            
+                                });         
                             
                             });
 
@@ -205,7 +192,6 @@ function biomedicalExtractor(dictation) {
 
                 }
              });
-            //getWiki(originalArray[0]);
         }
     });
     
@@ -236,12 +222,12 @@ function showArray(array) {
 }
 
 
-// retrives text information about word
+// retrieves text information about word
 function getWiki(token) {
-    //console.log("Thinking..."); // informs the user that it has picked up their speech and is processing it
     
     $('#showLoader').show(); // shows loading icon to let user know the app is processing the information
 
+    // CORS origin request
     // $.ajaxPrefilter(function (options) {
     //     if (options.crossDomain && jQuery.support.cors) {
     //         var https = (window.location.protocol === 'http:' ? 'http:' : 'https:');
@@ -249,7 +235,7 @@ function getWiki(token) {
     //     }
     // });
 
-        // recieves article summary at top of Wiki page
+        // receives article summary at top of Wiki page
         var URL = 'https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro=&explaintext&=';
 
         URL += "&titles=" + token;
@@ -258,8 +244,7 @@ function getWiki(token) {
 
         $.getJSON(URL, function (data) {
             var obj = data.query.pages;
-            var ob = Object.keys(obj)[0];
-            //console.log(obj[ob]["extract"]);  
+            var ob = Object.keys(obj)[0]; 
 
             // get correct snomed code
             var snomedIndex;
@@ -298,10 +283,11 @@ function setButtonColor(color) {
 
 
 var imageURLS;
-// retrives images
+// retrieves images
 function imageWiki(token) {
     $("#img").html(""); // clears contents from earlier searches
 
+    // CORS origin request
     // $.ajaxPrefilter(function (options) {
     //     if (options.crossDomain && jQuery.support.cors) {
     //         var https = (window.location.protocol === 'http:' ? 'http:' : 'https:');
@@ -316,8 +302,7 @@ function imageWiki(token) {
         var m;
         var urls = [];
         var regex = /<img.*?src=\\"(.*?)\\"/gmi;
-        //re = /img.*?src="(.*?)"/g
-
+ 
         while (m = regex.exec(response)) {
             urls.push(m[1]);
         }
@@ -341,7 +326,7 @@ function imageWiki(token) {
         // algorithm to ensure no duplicates in exported JSON file
        if(check.length != 0) {
         $.each(check, function(index, value) {
-            check.indexOf(jsonObject.Medical_Term) === -1 ? check.push(jsonObject.Medical_Term) && jsonStorage.push(jsonObject) : console.log("Duplicate");
+            check.indexOf(jsonObject.Medical_Term) === -1 ? check.push(jsonObject.Medical_Term) && jsonStorage.push(jsonObject) : console.log("");
         });
        }
        else {
@@ -364,7 +349,7 @@ function exportSession() {
 
     var d = new Date();
 
-// code below is adapted from https://medium.com/@danny.pule/export-json-to-csv-file-using-javascript-a0b7bc5b00d2
+        // code below is adapted from https://medium.com/@danny.pule/export-json-to-csv-file-using-javascript-a0b7bc5b00d2
 
         // converts object to JSON
        var jsonFile = JSON.stringify(jsonStorage, null, "\t"); // makes data readable on exported file
@@ -402,7 +387,7 @@ function exportSession() {
          originalArray.length = 0;
          jsonStorage.length = 0;
          check.length = 0;
-         snomedArray.length = 0; // just added, hopefully okay
+         snomedArray.length = 0;
     }
 
 

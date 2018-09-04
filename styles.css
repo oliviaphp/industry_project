@@ -1,3 +1,5 @@
+/* Code adapted from: https://github.com/JAnken123/wikipediagame */
+
 :root {
   --color-snow: #ffffff;
   --color-red: #F32C52;
@@ -7,37 +9,12 @@
   --color-border: #90B1F2;
 }
 
-/*#wrapper {
-     width: 1005px;
-     margin: 0 auto;
-}*/
-
-/*#leftcolumn, #rightcolumn {
-    border: 1px solid white;
-    float: left;
-    min-height: 450px;
-    color: white;
-}
-#leftcolumn {
-     width: 750px;
-
-
-}
-
-#rightcolumn {
-     width: 250px;
-
-
-}*/
-
 .containerLogs {
   display: flex;
   align-items: center;
   justify-content: center;
   max-width: 73%;
   margin: auto;
-  /*padding-top: 15px;*/
-  /*padding-left: 70px;*/
 }
 
 .container {
@@ -245,4 +222,28 @@ a:hover {
     padding-top: 15px;
 
   }
+}
+
+/* Loader */
+/* Code taken from: https://www.w3schools.com/howto/howto_css_loader.asp */
+.loader {
+  border: 16px solid #f3f3f3;
+  border-radius: 50%;
+  border-top: 16px solid #3498db;
+  width: 60px;
+  height: 60px;
+  -webkit-animation: spin 2s linear infinite; /* Safari */
+  animation: spin 2s linear infinite;
+  margin: auto;
+}
+
+/* Safari */
+@-webkit-keyframes spin {
+  0% { -webkit-transform: rotate(0deg); }
+  100% { -webkit-transform: rotate(360deg); }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }

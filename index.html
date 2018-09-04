@@ -7,7 +7,7 @@
 
 	<title>Holographic Patient Dialogue</title>
 
-	<!--<link rel="shortcut icon" href="resources/favicon.ico">-->
+	<link rel="shortcut icon" href="resources/favicon.ico">
 	<link rel="stylesheet" href="styles.css">
 
 
@@ -23,71 +23,72 @@
 
 		<div class="menubutton">
 
-		<button id="delete" class="button" style="float: right" background-color="red" onclick="deleteWord()">
+			<button id="delete" class="button" style="float: right" background-color="red" onclick="deleteWord()">
 				Delete Term
 			</button>
 
-        <button id="export" class="button" onclick="exportSession()">
-        	Stop and Export Session
-        </button>
-
-    </div>
-
-</header>
-
-<div class="container title">
-	Holographic Patient Dialogue
-</div>
-
-
-<div id="wrapper">
-	<div id="leftcolumn" style="float: left; width: 1150px">
-		<div class="container container-input">
-			<button id="newpage" class="button" onclick="previousWord()">
-				Previous Term
-			</button>
-			<div style="font-weight: bold; font-size:40px; margin: auto"  id="tokenInput"></div>
-
-			<button id="newpageNext" class="button" onclick="nextWord()">
-				Next Term
+			<button id="export" class="button" onclick="exportSession()">
+				Stop and Export Session
 			</button>
 
-
-		</div>	
-
-		<div style="text-align: center; font-weight: bold; margin: auto" id="snomed"></div>
-
-		<div class="words" contenteditable>
-
 		</div>
-		<div class="loader" id="showLoader"></div> 
 
-		<div class="container container-wiki animate-bottom">
-			<div id="img">
-				<!-- placeholder for wikipedia image-->
-			</div> 
+	</header>
 
-		</div>
-		<div class="container container-wikiimage">
-			<div id="wiki_intro">
-				<!-- placeholder for wikipedia text-->
+	<div class="container title">
+		Holographic Patient Dialogue
+	</div>
+
+
+	<div id="wrapper">
+		<div id="leftcolumn" style="float: left; width: 1150px">
+			<div class="container container-input">
+				<button id="newpage" class="button" onclick="previousWord()">
+					Previous Term
+				</button>
+				<div style="font-weight: bold; font-size:40px; margin: auto"  id="tokenInput"></div>
+
+				<button id="newpageNext" class="button" onclick="nextWord()">
+					Next Term
+				</button>
+
+
+			</div>	
+
+			<div style="text-align: center; font-weight: bold; margin: auto" id="snomed"></div>
+
+			<div class="words" contenteditable>
+
+			</div>
+			<div class="loader" id="showLoader"></div> 
+
+			<div class="container container-wiki animate-bottom">
+				<div id="img">
+					<!-- placeholder for wikipedia image-->
+				</div> 
+
+			</div>
+
+			<div class="container container-wikiimage">
+				<div id="wiki_intro">
+					<!-- placeholder for wikipedia text-->
+				</div>
+
+
 			</div>
 
 
+		</div> 
+
+	</div><!-- left column -->
+	<div id="right colomn" style="float: right; width: 260px">
+
+		<h2> Session Terms </h2>
+		<div id="logs">
+			<!--placeholder for list of medical terms in session-->
 		</div>
 
-		
-	</div> <!-- container container-input -->
-
-</div><!-- left column -->
-<div id="right colomn" style="float: right; width: 260px">
-
-	<h2> Session Terms </h2>
-	<div id="logs">
-		<!--placeholder for list of medical terms in session-->
-	</div>
-	<!--</div>-->
-</div> <!-- Right column -->
+	</div> <!-- Right column -->
 
 
 </div> <!-- Wrapper div -->
